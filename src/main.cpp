@@ -1,4 +1,4 @@
-
+/*
 //prende led con interruptor D(eje1)
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -30,7 +30,7 @@ int main(void){
 
   }
 }
-
+*/
 
 
 /*
@@ -144,56 +144,64 @@ int main(void){
   } 
   */
 
- /*
-
+ 
+//ultimo ejercicio
 //subir bajar con dos pulsadores usando 2 tipos de interrupciones (eje4)
-  //corregido usando del puerto d y b
- #include <avr/io.h>
- #include <avr/interrupt.h>
- #define F_CPU 16000000UL
- #include <util/delay.h>
-  double cuenta=0;
-void config_PCI(void){
-  PCICR|=0x01;
-  PCICR|=0x02;
-  PCMSK0|=0x08;
-  DDRB&=~0x08;
-  PORTB|=0x08;
-  PCMSK1|=0x01;
-  DDRC&=~0x01;
-  PORTC|=0x01;
+ 
+// subir bajar con dos botones 0 a 99 interrupcion en c y b
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#define F_CPU 16000000UL
+#include <util/delay.h>
+
+double enumeracion = 0;
+
+void config_PCI(void) {
+  PCICR |= 0x01;  // habilitar interrupcion para pinb
+  PCICR |= 0x02;  // habilitar interrupcicon para pinc
+
+  PCMSK0 |= 0x01; // habilitar el pon 0x01 del puertob
+  DDRB &= ~0x01;   
+  PORTB |= 0x01;  
+
+  PCMSK1 |= 0x01; // habilitar el pin 0x01 del puerto c
+  DDRC &= ~0x01;  
+  PORTC |= 0x01;  
 }
-ISR(PCINT0_vect){
-  _delay_ms(50);
-  cuenta+=0.5;
-  if(int(cuenta)>99){
-    cuenta=0.0;
+
+ISR(PCINT0_vect) {
+  _delay_ms(8);  
+  if ((int)enumeracion < 99) {
+    enumeracion += 0.5;
   }
 }
-ISR(PCINT1_vect){
-  _delay_ms(50);
-  cuenta-=0.5;
-  if(int(cuenta)<0){
-    cuenta=99.0;
+
+ISR(PCINT1_vect) {
+  _delay_ms(8);  
+  if ((int)enumeracion > 0) {
+    enumeracion -= 0.5;
   }
 }
-int main (void){
-  DDRD|=0xF0;//salidas displays
-  DDRB|=0X03;//activar/desactivar
-  PORTB&=~0x03;
+
+int main(void) {
+  DDRD |= 0xF0; // del deco
+  DDRC |= 0x06; // salidas para display
+  PORTC &= ~0x06;   
+
   config_PCI();
-  sei();
-  while (1){
-  PORTB&=~0x01;
-  PORTB|=0X02;
-  PORTD|=(int(cuenta)%10<<4);
-  PORTD&=(int(cuenta)%10<<4)|0x0F;//unidades
-  _delay_ms(8);
-  PORTB&=~0x02;
-  PORTB|=0X01;
-  PORTD|=(int(cuenta)/10<<4);
-  PORTD&=(int(cuenta)/10<<4)|0x0F;//decenas
-  _delay_ms(8);
+  sei();            
+
+  while (1) {
+    PORTC &= ~0x02;// apaga decenas
+    PORTC |= 0x04;           
+    PORTD |= ((int)enumeracion % 10) << 4;
+    PORTD &= (((int)enumeracion % 10) << 4) | 0x0F;
+    _delay_ms(8);
+
+    PORTC &= ~0x04;// apaga unidades
+    PORTC |= 0x02;            
+    PORTD |= ((int)enumeracion / 10) << 4;
+    PORTD &= (((int)enumeracion / 10) << 4) | 0x0F;
+    _delay_ms(8);
   }
 }
-  */
